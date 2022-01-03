@@ -1,37 +1,35 @@
+using e2eApplication.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace e2eApplication
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+        public string ConnectionString { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            ConnectionString = configuration.GetConnectionString("e2eDatabase");
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "e2eApplication", Version = "v1" });
             });
+
+            services.AddPersistence(ConnectionString);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,10 +48,18 @@ namespace e2eApplication
 
             app.UseAuthorization();
 
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<e2eDbContext>();
+                context.Database.EnsureCreated();
+                context.Database.Migrate();
+            }
         }
     }
 }
