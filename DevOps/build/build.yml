@@ -30,7 +30,7 @@ steps:
       arguments: '--configuration $(buildConfiguration)'
 
   - task: DotNetCoreCLI@2
-    displayName: binaries
+    displayName: 'Create binaries'
     inputs: 
       command: publish
       publishWebProjects: True
@@ -38,7 +38,7 @@ steps:
       zipAfterPublish: True
 
   - task: PublishBuildArtifacts@1
-    displayName: publish
+    displayName: 'Publish artifacts'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)
       ArtifactName: PiotrKlimisz.e2eApplication
