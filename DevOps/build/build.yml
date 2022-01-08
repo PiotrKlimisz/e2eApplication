@@ -27,6 +27,7 @@ steps:
       performMultiLevelLookup: True 
   
   - task: DotNetCoreCLI@2
+    displayName: 'Build'
     inputs:
       command: 'build'
       projects: '**/*.csproj'
@@ -34,9 +35,10 @@ steps:
 
         
   - task: DotNetCoreCLI@2
+    displayName: 'Run unit tests'
     inputs:
       command: 'test'
-      projects: '**/Tests/*.Tests.csproj'
+      projects: '**/*Tests/*.Tests.csproj'
       arguments: '--configuration $(buildConfiguration)'
 
 
